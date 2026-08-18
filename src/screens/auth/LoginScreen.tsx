@@ -111,9 +111,6 @@ export default function LoginScreen() {
           ¿No tienes cuenta? Regístrate aquí
         </p>
 
-        <p className="text-body-sm text-onSurfaceVariant mt-4 text-center">
-          Demo: +53 55512 3456 · cliente123 &nbsp;|&nbsp; +53 55500 0001 · admin123
-        </p>
       </div>
     </div>
   );

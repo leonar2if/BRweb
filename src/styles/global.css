@@ -59,7 +59,8 @@ a {
 .device-frame {
   position: relative;
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--background);
   color: var(--on-surface);
   display: flex;
@@ -71,6 +72,7 @@ a {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow-y: auto;
 }
 
 .status-bar-spacer {
@@ -83,13 +85,13 @@ a {
   .app-shell-desktop {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
-    min-height: 100dvh;
+    height: 100%;
   }
 
   .desktop-main {
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    height: 100%;
     min-width: 0;
   }
 
@@ -521,7 +523,8 @@ a {
   background: var(--surface);
   flex-shrink: 0;
   z-index: 10;
-  position: relative;
+  position: sticky;
+  top: 0;
 }
 
 .top-bar-gradient {
@@ -591,7 +594,8 @@ a {
   flex-shrink: 0;
   padding-bottom: env(safe-area-inset-bottom, 0);
   z-index: 10;
-  position: relative;
+  position: sticky;
+  bottom: 0;
 }
 
 .bottom-nav-item {

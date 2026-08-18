@@ -43,8 +43,15 @@ export default function ClientHomeScreen() {
     dismissCancellationNotice,
     refreshData,
   } = useClientData(userId);
-  const { toastMessage, isError, isFresh, notifyRefreshed } = useRefreshFeedback();
+  const { toastMessage, isError, isFresh, notifyRefreshed, guardedRefresh } = useRefreshFeedback();
   const isDesktop = useIsDesktop();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await guardedRefresh(refreshData, 'Actualizado');
+    setIsRefreshing(false);
+  };
 
   const [tab, setTab] = useState('book');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -132,6 +139,8 @@ export default function ClientHomeScreen() {
           <TopAppBar
             title={selectedProduct ? selectedProduct.name : TITLES[tab]}
             isDataFresh={tab === 'book' ? isFresh : null}
+            onRefreshClick={handleManualRefresh}
+            isRefreshing={isRefreshing}
           />
           <div className="desktop-content" style={{ position: 'relative' }}>
             <div className="desktop-content-inner">{content}</div>
@@ -150,6 +159,8 @@ export default function ClientHomeScreen() {
         isDarkMode={isDarkMode}
         onLogoutClick={tab === 'settings' ? undefined : logout}
         isDataFresh={tab === 'book' ? isFresh : null}
+        onRefreshClick={handleManualRefresh}
+        isRefreshing={isRefreshing}
       />
 
       <div className="device-scroll" style={{ position: 'relative' }}>

@@ -130,13 +130,17 @@ export default function Calendar({
                 : 'var(--on-surface-variant)';
 
               return (
-                <div key={cell} style={{ flex: 1, height: 44, padding: 2 }}>
+                <div
+                  key={cell}
+                  style={{ flex: 1, height: 44, padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
                   <button
                     disabled={!enabled}
                     onClick={() => onDateSelected(dateString)}
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      width: 38,
+                      height: 38,
+                      flexShrink: 0,
                       borderRadius: '50%',
                       border: isSelected ? '2px solid var(--primary)' : 'none',
                       background: bg,

@@ -45,7 +45,7 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
   ];
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '16px 16px 32px' }}>
+    <div className="device-scroll" style={{ overflowY: 'auto', padding: '16px 16px 32px', minHeight: '100%' }}>
       <div className="flex-col items-center" style={{ padding: '8px 0 24px' }}>
         <div
           style={{
@@ -163,9 +163,6 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
           <p className="text-body-lg" style={{ margin: 0 }}>
             Contactar por WhatsApp
           </p>
-          <p className="text-body-sm text-onSurfaceVariant" style={{ margin: '2px 0 0' }}>
-            +53 {toLocalDisplay(managerPhone)}
-          </p>
         </div>
         <a
           href={`https://wa.me/${managerPhone}`}
@@ -179,7 +176,7 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
         </a>
       </div>
 
-      <div className="mt-8">
+      <div style={{ marginTop: 'auto', paddingTop: 32 }}>
         <Button variant="outlined-error" full icon="exit_to_app" onClick={() => setShowLogoutConfirm(true)}>
           Cerrar sesión
         </Button>
@@ -213,6 +210,9 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
             </>
           }
         >
+          <p className="text-body-md text-onSurfaceVariant" style={{ margin: '0 0 12px' }}>
+            Indica tu fecha de cumpleaños para conocer un poco más sobre ti.
+          </p>
           <label className="field">
             <span className="field-static-label">Fecha de nacimiento</span>
             <span className="field-input-wrap">

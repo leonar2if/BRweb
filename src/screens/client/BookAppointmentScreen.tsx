@@ -232,7 +232,7 @@ export default function BookAppointmentScreen({
                               isSelected={selectedTime === slot}
                               useAbbreviatedLabels
                               onClick={() => {
-                                if (!blockedSlots.has(slot)) setSelectedTime(slot);
+                                if (!blockedSlots.has(slot) && !occupiedSlots.has(slot)) setSelectedTime(slot);
                               }}
                             />
                           </div>

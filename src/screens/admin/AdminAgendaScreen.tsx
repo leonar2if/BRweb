@@ -375,13 +375,17 @@ function AdminMonthCalendar({
               // seleccionable); cualquier día laborable futuro → verde.
               const isSelectable = isWorking && dateString >= today;
               return (
-                <div key={cell} style={{ flex: 1, height: 40, padding: 2 }}>
+                <div
+                  key={cell}
+                  style={{ flex: 1, height: 40, padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
                   <button
                     onClick={() => isSelectable && onDateSelected(dateString)}
                     disabled={!isSelectable}
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      width: 34,
+                      height: 34,
+                      flexShrink: 0,
                       borderRadius: '50%',
                       border: isSelected ? '2px solid var(--primary)' : 'none',
                       background: isToday ? '#F9A825' : 'transparent',

@@ -82,7 +82,7 @@ export default function AdminScheduleScreen({ settings, onBackClick, onSaved }: 
   const canSave = selectedDays.size > 0 && slots.length > 0;
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto' }}>
+    <div className="screen-content">
       <div className="flex items-center justify-between" style={{ padding: 8 }}>
         <div className="flex items-center">
           <IconButton icon="arrow_back" label="Volver" onClick={onBackClick} />

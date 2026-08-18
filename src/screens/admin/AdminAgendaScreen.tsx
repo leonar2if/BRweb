@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Appointment, BlockedSlot, Service } from '../../types/models';
 import AppointmentCard from '../../components/AppointmentCard';
 import TimeSlotWidget from '../../components/TimeSlotWidget';
@@ -94,7 +94,9 @@ export default function AdminAgendaScreen({
   };
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '0 0 24px' }}>
+    // Contenido plano: el scroll vertical lo posee el padre (device-scroll en
+    // móvil / desktop-content en PC). Sin device-scroll anidado.
+    <div className="screen-content" style={{ padding: '0 0 24px' }}>
       <div
         className="surface-variant"
         style={{ padding: '16px 16px 12px', boxShadow: 'var(--elevation-1, 0 1px 3px rgba(0,0,0,0.15))' }}
@@ -137,55 +139,60 @@ export default function AdminAgendaScreen({
         </div>
       </div>
 
-      <AdminMonthCalendar selectedDate={selectedDate} workingDays={workingDays} onDateSelected={onDateChange} />
+      {/* CALENDARIO | HORARIOS en PC (>=1024px); apilados en móvil/tablet */}
+      <div className="calendar-slots-grid">
+        <AdminMonthCalendar selectedDate={selectedDate} workingDays={workingDays} onDateSelected={onDateChange} />
 
-      <p className="text-title-md fw-bold" style={{ padding: '8px 16px', margin: 0 }}>
-        Reservas para {formatDateForDisplay(selectedDate)} ({nonCanceledCount}):
-      </p>
+        <div>
+          <p className="text-title-md fw-bold" style={{ padding: '8px 16px', margin: 0 }}>
+            Reservas para {formatDateForDisplay(selectedDate)} ({nonCanceledCount}):
+          </p>
 
-      {viewMode === 'slots' ? (
-        <div className="flex-col" style={{ padding: '0 8px' }}>
-          {activeSlots.map((slot) => {
-            const appt = appointmentForSlot(slot);
-            const isBlocked = !appt && blockedTimes.has(slot);
-            return (
-              <TimeSlotWidget
-                key={slot}
-                time={slot}
-                isOccupied={appt !== null}
-                isBlocked={isBlocked}
-                onClick={() => {
-                  if (!appt && !isBlocked) setQuickBookSlot(slot);
-                }}
-              />
-            );
-          })}
+          {viewMode === 'slots' ? (
+            <div className="flex-col" style={{ padding: '0 8px' }}>
+              {activeSlots.map((slot) => {
+                const appt = appointmentForSlot(slot);
+                const isBlocked = !appt && blockedTimes.has(slot);
+                return (
+                  <TimeSlotWidget
+                    key={slot}
+                    time={slot}
+                    isOccupied={appt !== null}
+                    isBlocked={isBlocked}
+                    onClick={() => {
+                      if (!appt && !isBlocked) setQuickBookSlot(slot);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ) : dayAppointments.length === 0 ? (
+            <p className="text-body-md text-onSurfaceVariant text-center" style={{ padding: 32 }}>
+              No hay reservas registradas en este día.
+            </p>
+          ) : (
+            <div className="card-grid" style={{ padding: '0 12px' }}>
+              {dayAppointments.map((appt) => (
+                <AppointmentCard
+                  key={appt.id}
+                  appointment={appt}
+                  serviceName={store.serviceNameFor(services, appt.serviceId)}
+                  isAdmin
+                  onCallClick={() => window.open(`tel:${COUNTRY_CODE}${appt.phone.replace(/\s|\+/g, '')}`, '_self')}
+                  onCancelClick={async () => {
+                    await store.updateAppointmentStatus(appt.id, 'canceled', 'admin');
+                    onRefresh();
+                  }}
+                  onAttendClick={async () => {
+                    await store.finalizeAppointment(appt.id, appt.phone);
+                    onRefresh();
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      ) : dayAppointments.length === 0 ? (
-        <p className="text-body-md text-onSurfaceVariant text-center" style={{ padding: 32 }}>
-          No hay reservas registradas en este día.
-        </p>
-      ) : (
-        <div className="card-grid" style={{ padding: '0 12px' }}>
-          {dayAppointments.map((appt) => (
-            <AppointmentCard
-              key={appt.id}
-              appointment={appt}
-              serviceName={store.serviceNameFor(services, appt.serviceId)}
-              isAdmin
-              onCallClick={() => window.open(`tel:${COUNTRY_CODE}${appt.phone.replace(/\s|\+/g, '')}`, '_self')}
-              onCancelClick={async () => {
-                await store.updateAppointmentStatus(appt.id, 'canceled', 'admin');
-                onRefresh();
-              }}
-              onAttendClick={async () => {
-                await store.finalizeAppointment(appt.id, appt.phone);
-                onRefresh();
-              }}
-            />
-          ))}
-        </div>
-      )}
+      </div>
 
       {quickBookSlot && (
         <QuickAdminBookingDialog
@@ -247,14 +254,30 @@ function QuickAdminBookingDialog({
   onDismiss: () => void;
   onBooked: () => void;
 }) {
-  const [service, setService] = useState<Service | null>(services[0] ?? null);
+  // Solo servicios activos con ID real (misma regla que el flujo del
+  // cliente: nunca nombre ni índice de array como identificador).
+  const activeServices = services.filter((s) => s.isActive && Number.isFinite(s.id) && s.id > 0);
+  const [service, setService] = useState<Service | null>(activeServices[0] ?? null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Si la lista de servicios llega/ cambia después de abrir el diálogo,
+  // re-sincroniza la selección con un servicio activo real.
+  useEffect(() => {
+    setService((prev) => {
+      if (prev && activeServices.some((s) => s.id === prev.id)) return prev;
+      return activeServices[0] ?? null;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services]);
+
   const submit = async () => {
-    if (!service) return;
+    if (!service || !Number.isFinite(service.id) || service.id <= 0) {
+      setError('Selecciona un servicio válido de la lista.');
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -285,16 +308,22 @@ function QuickAdminBookingDialog({
       <p className="text-label-lg fw-bold" style={{ margin: '0 0 4px' }}>
         Servicio
       </p>
-      <div style={{ maxHeight: 160, overflowY: 'auto' }}>
-        {services.map((s) => (
-          <label key={s.id} className="flex items-center gap-2" style={{ padding: '2px 0' }}>
-            <input type="radio" checked={service?.id === s.id} onChange={() => setService(s)} />
-            <span className="text-body-md">
-              {s.name} ({s.durationSlots} turno{s.durationSlots > 1 ? 's' : ''})
-            </span>
-          </label>
-        ))}
-      </div>
+      {activeServices.length === 0 ? (
+        <p className="text-body-md text-onSurfaceVariant" style={{ margin: '4px 0' }}>
+          Actualmente no hay servicios activos disponibles.
+        </p>
+      ) : (
+        <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+          {activeServices.map((s) => (
+            <label key={s.id} className="flex items-center gap-2" style={{ padding: '2px 0' }}>
+              <input type="radio" checked={service?.id === s.id} onChange={() => setService(s)} />
+              <span className="text-body-md">
+                {s.name} ({s.durationSlots} turno{s.durationSlots > 1 ? 's' : ''})
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
       <p className="text-label-lg fw-bold text-onSurfaceVariant" style={{ margin: '12px 0 4px' }}>
         Datos del cliente (opcional)
       </p>

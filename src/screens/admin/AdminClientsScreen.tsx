@@ -31,7 +31,7 @@ export default function AdminClientsScreen({ onBackClick }: { onBackClick: () =>
   const birthdaysToday = clients.filter((c) => c.birthday && c.birthday.slice(5) === todayMonthDay);
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto' }}>
+    <div className="screen-content">
       <div className="flex items-center" style={{ padding: 8 }}>
         <IconButton icon="arrow_back" label="Volver" onClick={onBackClick} />
         <span className="text-title-md fw-bold">Clientes ({clients.length})</span>

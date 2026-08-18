@@ -639,11 +639,21 @@ async function getNextTicketNumber(date: string): Promise<number> {
  * real de Supabase/RLS para que la persona vea qué falló.
  */
 export async function confirmBooking(input: BookingInput, activeSlots: string[] = DEFAULT_SLOTS): Promise<Appointment> {
-  const { data: serviceRow } = check(
+  // 1) El ID del servicio debe ser un número real (nunca nombre ni índice).
+  if (!Number.isFinite(input.serviceId) || input.serviceId <= 0) {
+    throw new Error('Selecciona un servicio válido.');
+  }
+
+  // 2) Ese ID debe existir en Supabase y corresponder a un servicio activo.
+  //    check() devuelve la fila directamente (o null con maybeSingle): NO se
+  //    puede desestructurar { data } sobre la fila, eso siempre daba
+  //    undefined y hacía fallar toda reserva con "servicio válido".
+  const serviceRow = check(
     await supabase.from('services').select('*').eq('id', input.serviceId).maybeSingle()
   );
   if (!serviceRow) throw new Error('Selecciona un servicio válido.');
   const service = rowToService(serviceRow);
+  if (!service.isActive) throw new Error('Ese servicio ya no está disponible. Elige otro.');
 
   const range = slotRangeFor(input.appointmentTime, service.durationSlots, activeSlots);
   if (!range) throw new Error('El horario seleccionado no está disponible para este servicio.');

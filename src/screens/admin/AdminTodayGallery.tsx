@@ -58,7 +58,7 @@ export default function AdminTodayGallery({
   if (galleryIndex !== null) {
     const item = items[galleryIndex];
     return (
-      <div className="flex-col" style={{ height: '100%' }}>
+      <div className="flex-col" style={{ flex: 1, minHeight: 0 }}>
         <div className="surface-variant flex items-center justify-between" style={{ padding: 8, boxShadow: 'var(--elevation-2)' }}>
           <IconButton icon="arrow_back" label="Volver a la lista" onClick={() => setGalleryIndex(null)} />
           <span className="text-title-sm fw-bold">
@@ -79,6 +79,8 @@ export default function AdminTodayGallery({
             />
           </div>
         </div>
+        {/* Esta vista reemplaza TODA la pantalla (sin nav): aquí el
+            device-scroll SÍ es el propietario del scroll vertical. */}
         <div className="device-scroll" style={{ overflowY: 'auto' }}>
           {item.appointment ? (
             <OccupiedTurnDetail
@@ -106,7 +108,7 @@ export default function AdminTodayGallery({
     .reduce((sum, a) => sum + (services.find((s) => s.id === a.serviceId)?.price ?? 15), 0);
 
   return (
-    <div className="flex-col" style={{ height: '100%', position: 'relative' }}>
+    <div className="flex-col" style={{ flex: 1, minHeight: 0, position: 'relative' }}>
       <div className="surface-variant flex items-center justify-between" style={{ padding: 8, boxShadow: 'var(--elevation-2)' }}>
         <div className="flex items-center">
           <IconButton icon="arrow_back" label="Volver" onClick={onClose} />
@@ -115,10 +117,15 @@ export default function AdminTodayGallery({
         <IconButton icon="block" label="Tomarse libre el resto del día" color="var(--error)" onClick={() => setShowBlockDialog(true)} />
       </div>
 
+      {/* Propietario del scroll de esta pantalla completa. En tablet/PC los
+          turnos usan rejilla fluida (today-slots-grid) para aprovechar el
+          ancho en vez de quedar apilados en una sola columna estrecha. */}
       <div className="device-scroll" style={{ overflowY: 'auto', padding: '12px 12px 90px' }}>
-        {items.map((item, index) => (
-          <TodaySlotRow key={item.time} item={item} onCardClick={() => item.appointment && setGalleryIndex(index)} onRefresh={onRefresh} />
-        ))}
+        <div className="today-slots-grid" style={{ maxWidth: 1240, margin: '0 auto', width: '100%' }}>
+          {items.map((item, index) => (
+            <TodaySlotRow key={item.time} item={item} onCardClick={() => item.appointment && setGalleryIndex(index)} onRefresh={onRefresh} />
+          ))}
+        </div>
       </div>
 
       <div style={{ position: 'absolute', left: 0, right: 0, bottom: 16, display: 'flex', justifyContent: 'center' }}>
@@ -218,10 +225,9 @@ function TodaySlotRow({
 
   return (
     <div
-      className="card"
+      className="card today-slot-card"
       onClick={item.appointment ? onCardClick : undefined}
       style={{
-        margin: '4px 0',
         padding: '12px 14px',
         cursor: item.appointment ? 'pointer' : 'default',
         border: item.isCurrent ? '2px solid #F9A825' : 'none',

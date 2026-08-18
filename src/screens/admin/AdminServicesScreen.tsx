@@ -33,7 +33,7 @@ export default function AdminServicesScreen({ services, onRefresh }: AdminServic
   };
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '12px 0 90px', position: 'relative' }}>
+    <div className="screen-content" style={{ padding: '12px 0 90px', position: 'relative' }}>
       <p className="text-title-md fw-bold" style={{ padding: '4px 16px 8px' }}>
         Servicios ({services.length})
       </p>

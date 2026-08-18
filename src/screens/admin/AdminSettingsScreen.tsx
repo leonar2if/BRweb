@@ -82,7 +82,7 @@ export default function AdminSettingsScreen({ settings, services = [], allAppoin
           .join(', ');
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '16px 16px 32px' }}>
+    <div className="screen-content" style={{ padding: '16px 16px 32px' }}>
       {/* Registro Histórico de Citas (puerto de AdminSettingsScreen.kt):
           ver todas las citas con filtros y detalles. */}
       <div

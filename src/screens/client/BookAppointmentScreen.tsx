@@ -117,7 +117,12 @@ export default function BookAppointmentScreen({
   };
 
   const confirmBooking = async () => {
-    if (!selectedService) return;
+    // Validación real del ID: el servicio seleccionado debe tener un ID
+    // numérico válido (nunca el nombre ni la posición en el array).
+    if (!selectedService || !Number.isFinite(selectedService.id) || selectedService.id <= 0) {
+      setError('Selecciona un servicio válido de la lista.');
+      return;
+    }
 
     if (isForOther && (otherName.trim() === '' || otherPhone.trim() === '')) {
       setError('Por favor, completa el nombre y teléfono de la otra persona.');
@@ -183,7 +188,9 @@ export default function BookAppointmentScreen({
   };
 
   return (
-    <div className="flex-col" style={{ height: '100%' }}>
+    // Contenido plano: el padre (device-scroll móvil / desktop-content PC)
+    // posee el único scroll vertical de la pantalla.
+    <div className="flex-col">
       {step >= 2 && step <= 3 && (
         <div className="surface-variant" style={{ boxShadow: 'var(--elevation-2)' }}>
           <div className="flex items-center" style={{ padding: 8 }}>
@@ -195,17 +202,20 @@ export default function BookAppointmentScreen({
         </div>
       )}
 
-      <div className="device-scroll" style={{ overflowY: 'auto' }}>
+      <div className="screen-content">
         {(step === 0 || step === 1) && (
-          <div className="two-col" style={{ padding: '0 16px 80px' }}>
-            <div>
-              <p className="text-title-md fw-bold mt-2" style={{ padding: '0 0 8px' }}>
-                1. Elige un día en el calendario:
-              </p>
-              <Calendar selectedDate={selectedDate} onDateSelected={selectDate} workingDays={workingDays} activeSlots={activeSlots} />
+          <div style={{ padding: '0 16px 40px' }}>
+            {/* CALENDARIO | HORARIOS en PC (>=1024px); apilados en móvil/tablet */}
+            <div className="calendar-slots-grid">
+              <div>
+                <p className="text-title-md fw-bold mt-2" style={{ padding: '0 0 8px' }}>
+                  1. Elige un día en el calendario:
+                </p>
+                <Calendar selectedDate={selectedDate} onDateSelected={selectDate} workingDays={workingDays} activeSlots={activeSlots} />
+              </div>
 
               {(step === 1 || selectedDate) && (
-                <>
+                <div>
                   {error && (
                     <div className="mt-3" style={{ background: 'var(--error-container)', borderRadius: 'var(--radius-sm)' }}>
                       <p className="text-body-md text-center" style={{ color: 'var(--on-error-container)', padding: 12, margin: 0 }}>
@@ -224,7 +234,7 @@ export default function BookAppointmentScreen({
                     slotsChunked.map((row, i) => (
                       <div key={i} className="flex" style={{ gap: 8 }}>
                         {row.map((slot) => (
-                          <div key={slot} style={{ flex: 1 }}>
+                          <div key={slot} style={{ flex: 1, minWidth: 0 }}>
                             <TimeSlotWidget
                               time={slot}
                               isOccupied={occupiedSlots.has(slot)}
@@ -248,7 +258,7 @@ export default function BookAppointmentScreen({
                       </Button>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
 
@@ -272,25 +282,31 @@ export default function BookAppointmentScreen({
         )}
 
         {step === 2 && (
-          <div style={{ padding: '16px 0 80px' }}>
+          <div style={{ padding: '16px 0 40px' }}>
             <p className="text-title-md fw-bold" style={{ padding: '0 16px 8px' }}>
               Selecciona un servicio de la lista:
             </p>
-            <div className="card-grid" style={{ padding: '0 12px' }}>
-              {services.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  isSelected={selectedService?.id === service.id}
-                  onSelect={() => selectService(service)}
-                />
-              ))}
-            </div>
+            {services.length === 0 ? (
+              <p className="text-body-md text-onSurfaceVariant text-center" style={{ padding: 32 }}>
+                Actualmente no hay servicios disponibles. Inténtalo más tarde o contacta con la barbería.
+              </p>
+            ) : (
+              <div className="card-grid" style={{ padding: '0 12px' }}>
+                {services.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    isSelected={selectedService?.id === service.id}
+                    onSelect={() => selectService(service)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {step === 3 && selectedService && (
-          <div style={{ padding: 16, paddingBottom: 80 }}>
+          <div style={{ padding: 16, paddingBottom: 40 }}>
             <div
               className="card"
               style={{ padding: 16, background: 'color-mix(in srgb, var(--primary-container) 50%, transparent)' }}

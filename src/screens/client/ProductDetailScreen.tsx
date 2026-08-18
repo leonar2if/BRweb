@@ -14,7 +14,7 @@ export default function ProductDetailScreen({ product, managerPhone = '', onBack
   const [activeImage, setActiveImage] = useState(0);
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto' }}>
+    <div className="screen-content">
       <div className="flex items-center" style={{ padding: 8 }}>
         <IconButton icon="arrow_back" label="Volver" onClick={onBack} />
       </div>

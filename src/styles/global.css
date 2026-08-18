@@ -47,7 +47,7 @@ a {
 :root {
   --desktop-breakpoint: 900px;
   --sidebar-width: 260px;
-  --content-max-width: 1180px;
+  --content-max-width: 1240px;
 }
 
 .app-shell {
@@ -67,12 +67,26 @@ a {
   flex-direction: column;
 }
 
+/* ÚNICO propietario del scroll vertical por pantalla. Solo lo usan los
+   contenedores raíz de cada pantalla (Home cliente/admin, galería de Hoy,
+   login/registro). Las pantallas internas NUNCA crean otro device-scroll:
+   renderizan contenido plano y dejan que este contenedor desplace. */
 .device-scroll {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: clip;
+}
+
+/* Contenido de pantalla: bloque normal, sin scroll propio ni alturas fijas.
+   El padding inferior garantiza que nada quede escondido bajo la
+   BottomNavigation en móvil. */
+.screen-content {
+  display: block;
+  width: 100%;
+  padding-bottom: 24px;
 }
 
 .status-bar-spacer {
@@ -81,23 +95,31 @@ a {
 
 @media (min-width: 900px) {
   /* En escritorio, App.tsx monta app-shell-desktop (sidebar + main) en vez
-     de device-frame + bottom-nav; estas reglas dan forma a ese layout. */
+     de device-frame + bottom-nav; estas reglas dan forma a ese layout.
+     El shell ocupa el hueco que deja el banner dentro de device-frame
+     (flex column): flex:1 + min-height:0, nunca height:100% (eso
+     desbordaría por la altura del banner y cortaría contenido). */
   .app-shell-desktop {
     display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr;
-    height: 100%;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    flex: 1;
+    min-height: 0;
+    width: 100%;
   }
 
   .desktop-main {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
     min-width: 0;
   }
 
   .desktop-content {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    overflow-x: clip;
     padding: 28px clamp(20px, 4vw, 48px) 48px;
   }
 
@@ -124,9 +146,10 @@ a {
     background: var(--surface);
     border-right: 1px solid color-mix(in srgb, var(--on-surface-variant) 14%, transparent);
     padding: 20px 12px;
-    position: sticky;
-    top: 0;
-    height: 100dvh;
+    /* La sidebar es celda del grid del shell: se estira a toda la altura y
+       NO se desplaza con el contenido (el scroll vive en .desktop-content). */
+    height: 100%;
+    overflow-y: auto;
   }
 
   .sidebar-brand {
@@ -224,11 +247,12 @@ a {
   display: block;
 }
 
-@media (min-width: 900px) {
+/* Tablet: dos columnas cuando hay espacio suficiente */
+@media (min-width: 768px) {
   .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
   }
 
   .card-grid .list-item-card {
@@ -236,17 +260,61 @@ a {
   }
 }
 
-/* Formularios / paneles de dos columnas en escritorio (reserva, diálogos largos) */
+/* Escritorio: tarjetas un poco más anchas */
+@media (min-width: 1280px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Formularios / paneles de dos columnas (reserva, diálogos largos).
+   Móvil: una columna. Escritorio: dos columnas reales. */
 .two-col {
   display: block;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .two-col {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 24px;
     align-items: start;
+  }
+}
+
+/* CALENDARIO | HORARIOS — layout de dos zonas para reserva y agenda.
+   Móvil/tablet: apilados (calendario arriba, horarios debajo).
+   >=1024px (ancho real suficiente): calendario a la izquierda con ancho
+   razonable y horarios con su propia zona a la derecha. */
+.calendar-slots-grid {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .calendar-slots-grid {
+    display: grid;
+    grid-template-columns: minmax(340px, 460px) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+}
+
+/* Turnos del día (galería "Hoy" del admin): lista única en móvil, rejilla
+   fluida en tablet/escritorio para aprovechar el ancho sin estirar tarjetas. */
+.today-slot-card {
+  margin: 4px 0;
+}
+
+@media (min-width: 768px) {
+  .today-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+  }
+
+  .today-slots-grid .today-slot-card {
+    margin: 0;
   }
 }
 

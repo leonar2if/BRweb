@@ -45,7 +45,10 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
   ];
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '16px 16px 32px', minHeight: '100%' }}>
+    // Sin device-scroll propio: el contenedor padre (device-scroll en móvil /
+    // desktop-content en PC) es el único dueño del scroll vertical. Así la
+    // sección CUENTA y todo lo demás siempre es alcanzable con scroll normal.
+    <div className="screen-content" style={{ padding: '16px 16px 32px' }}>
       <div className="flex-col items-center" style={{ padding: '8px 0 24px' }}>
         <div
           style={{
@@ -176,7 +179,7 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
         </a>
       </div>
 
-      <div style={{ marginTop: 'auto', paddingTop: 32 }}>
+      <div style={{ paddingTop: 32 }}>
         <Button variant="outlined-error" full icon="exit_to_app" onClick={() => setShowLogoutConfirm(true)}>
           Cerrar sesión
         </Button>

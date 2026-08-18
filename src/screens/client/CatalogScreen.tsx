@@ -11,7 +11,7 @@ interface CatalogScreenProps {
 export default function CatalogScreen({ products, onProductClick }: CatalogScreenProps) {
   if (products.length === 0) {
     return (
-      <div className="flex-col items-center justify-center" style={{ height: '100%', padding: 32 }}>
+      <div className="flex-col items-center justify-center" style={{ minHeight: '50vh', padding: 32 }}>
         <Icon name="shopping_bag" size={64} style={{ color: 'color-mix(in srgb, var(--on-surface-variant) 40%, transparent)' }} />
         <p className="text-title-md fw-bold text-onSurfaceVariant mt-4 text-center">
           El catálogo está vacío en este momento.
@@ -24,7 +24,7 @@ export default function CatalogScreen({ products, onProductClick }: CatalogScree
   }
 
   return (
-    <div className="device-scroll" style={{ overflowY: 'auto', padding: '12px 0 24px' }}>
+    <div className="screen-content" style={{ padding: '12px 0 24px' }}>
       <p className="text-title-md fw-bold text-primary" style={{ padding: '4px 16px 8px' }}>
         Productos Exclusivos
       </p>

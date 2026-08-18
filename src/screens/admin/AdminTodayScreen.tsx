@@ -29,8 +29,8 @@ export default function AdminTodayScreen({ todayAppointments, isLoading, onStart
 
   return (
     <div
-      className="device-scroll flex-col items-center justify-center"
-      style={{ padding: 24, textAlign: 'center' }}
+      className="screen-content flex-col items-center justify-center"
+      style={{ padding: 24, textAlign: 'center', minHeight: '60vh' }}
     >
       <h1 className="text-display-md fw-extrabold text-primary" style={{ margin: 0 }}>
         Hoy

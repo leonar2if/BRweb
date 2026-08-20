@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import type { Appointment, Service, Settings } from '../../types/models';
 import { useAuth } from '../../context/AuthContext';
@@ -217,7 +218,7 @@ export default function AdminSettingsScreen({ settings, services = [], allAppoin
         <Switch checked={isDarkMode} onChange={setDarkMode} label="Modo oscuro" />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <Button variant="outlined-error" full icon="exit_to_app" onClick={() => setShowLogoutConfirm(true)}>
           Cerrar sesión
         </Button>

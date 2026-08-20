@@ -136,7 +136,7 @@ export default function SettingsScreen({ managerPhone }: { managerPhone: string 
             <p className="text-body-lg" style={{ margin: 0 }}>
               {userBirthday
                 ? formatDateForDisplay(userBirthday)
-                : 'No configurado — avisanos y te tenemos un detalle ese día 🎉'}
+                : 'No configurado'}
             </p>
           </div>
         </div>

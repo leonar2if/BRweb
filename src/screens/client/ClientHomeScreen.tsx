@@ -12,10 +12,11 @@ import BookAppointmentScreen from './BookAppointmentScreen';
 import CatalogScreen from './CatalogScreen';
 import ProductDetailScreen from './ProductDetailScreen';
 import SettingsScreen from './SettingsScreen';
+import BookingConfirmationScreen from './BookingConfirmationScreen';
 import { Dialog } from '../../components/Dialog';
 import { Button } from '../../components/Button';
 import { formatDateForDisplay, formatTimeForDisplay } from '../../utils/dateFormatter';
-import type { Product } from '../../types/models';
+import type { Product, Appointment } from '../../types/models';
 
 const NAV_ITEMS: NavItem[] = [
   { key: 'book', icon: 'calendar_month', label: 'Reservar' },
@@ -55,10 +56,21 @@ export default function ClientHomeScreen() {
 
   const [tab, setTab] = useState('book');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [lastBooking, setLastBooking] = useState<Appointment | null>(null);
 
   const handleTabChange = (key: string) => {
     setTab(key);
     setSelectedProduct(null);
+    setLastBooking(null);
+  };
+
+  const handleBookingSuccess = (appointment: Appointment) => {
+    setLastBooking(appointment);
+  };
+
+  const handleGoHomeFromConfirmation = () => {
+    setLastBooking(null);
+    refreshData();
   };
 
   if (isLoading) {
@@ -93,25 +105,36 @@ export default function ClientHomeScreen() {
   const content = (
     <>
       {cancellationDialog}
-      {tab === 'book' && (
-        <BookAppointmentScreen
-          services={activeServices}
-          clientAppointments={clientAppointments}
-          activeSlots={activeSlots}
-          workingDays={workingDays}
-          onDaySlotsRefreshed={() => notifyRefreshed()}
-          onBookingComplete={() => refreshData()}
+      {lastBooking ? (
+        <BookingConfirmationScreen
+          appointment={lastBooking}
+          serviceName={activeServices.find((s) => s.id === lastBooking.serviceId)?.name ?? 'Barbería'}
+          onGoHome={handleGoHomeFromConfirmation}
         />
+      ) : (
+        <>
+          {tab === 'book' && (
+            <BookAppointmentScreen
+              services={activeServices}
+              clientAppointments={clientAppointments}
+              activeSlots={activeSlots}
+              workingDays={workingDays}
+              onDaySlotsRefreshed={() => notifyRefreshed()}
+              onBookingComplete={() => refreshData()}
+              onBookingSuccess={handleBookingSuccess}
+            />
+          )}
+
+          {tab === 'catalog' &&
+            (selectedProduct ? (
+              <ProductDetailScreen product={selectedProduct} managerPhone={managerPhone} onBack={() => setSelectedProduct(null)} />
+            ) : (
+              <CatalogScreen products={activeProducts} onProductClick={setSelectedProduct} />
+            ))}
+
+          {tab === 'settings' && <SettingsScreen managerPhone={managerPhone} />}
+        </>
       )}
-
-      {tab === 'catalog' &&
-        (selectedProduct ? (
-          <ProductDetailScreen product={selectedProduct} managerPhone={managerPhone} onBack={() => setSelectedProduct(null)} />
-        ) : (
-          <CatalogScreen products={activeProducts} onProductClick={setSelectedProduct} />
-        ))}
-
-      {tab === 'settings' && <SettingsScreen managerPhone={managerPhone} />}
     </>
   );
 

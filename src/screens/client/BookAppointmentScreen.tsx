@@ -21,6 +21,7 @@ interface BookAppointmentScreenProps {
   workingDays?: Set<number>;
   onDaySlotsRefreshed: () => void;
   onBookingComplete: () => void;
+  onBookingSuccess: (appointment: Appointment) => void;
 }
 
 type Step = 0 | 1 | 2 | 3 | 4;
@@ -32,6 +33,7 @@ export default function BookAppointmentScreen({
   workingDays = DEFAULT_WORKING_DAYS,
   onDaySlotsRefreshed,
   onBookingComplete,
+  onBookingSuccess,
 }: BookAppointmentScreenProps) {
   const { userId, userPhone, userFullName } = useAuth();
 
@@ -44,7 +46,6 @@ export default function BookAppointmentScreen({
   const [isDaySlotsLoading, setIsDaySlotsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastBooked, setLastBooked] = useState<Appointment | null>(null);
 
   const [isForOther, setIsForOther] = useState(false);
   const [otherName, setOtherName] = useState('');
@@ -163,8 +164,7 @@ export default function BookAppointmentScreen({
         },
         activeSlots
       );
-      setLastBooked(appt);
-      setStep(4);
+      onBookingSuccess(appt);
     } catch (e) {
       setError(toHumanMessage(e));
     } finally {
@@ -183,7 +183,6 @@ export default function BookAppointmentScreen({
     setOtherLastName2('');
     setOtherPhone('');
     setError(null);
-    setLastBooked(null);
     onBookingComplete();
   };
 
@@ -430,54 +429,7 @@ export default function BookAppointmentScreen({
           </div>
         )}
 
-        {step === 4 && lastBooked && (
-          <div className="flex-col items-center justify-center" style={{ padding: 24, minHeight: '100%' }}>
-            <Icon name="check_circle" size={72} filled style={{ color: 'var(--slot-free)' }} />
-            <h2 className="text-headline-sm fw-extrabold text-primary mt-4">¡Reserva Confirmada!</h2>
-
-            <div
-              className="card mt-6 w-full"
-              style={{
-                borderRadius: 'var(--radius-2xl)',
-                boxShadow: 'var(--elevation-6)',
-                background: 'var(--surface-variant)',
-                padding: 24,
-                maxWidth: 360,
-              }}
-            >
-              <div className="flex-col items-center">
-                <span
-                  className="text-title-md fw-extrabold"
-                  style={{ background: 'var(--slot-free)', color: '#fff', borderRadius: 'var(--radius-sm)', padding: '8px 16px' }}
-                >
-                  ✓ RESERVA CONFIRMADA
-                </span>
-                <p className="text-title-md mt-4" style={{ margin: '16px 0 0' }}>
-                  📅 {formatDayName(lastBooked.appointmentDate)}
-                </p>
-                <p className="text-title-lg fw-bold mt-1" style={{ margin: '6px 0 0' }}>
-                  ⏰ Hora: {lastBooked.appointmentTime.slice(0, 5)}
-                </p>
-                <p className="text-body-lg mt-1" style={{ margin: '6px 0 0' }}>
-                  💈 Servicio: {selectedService?.name ?? 'Barbería'}
-                </p>
-                <p className="text-body-md mt-1" style={{ margin: '6px 0 0' }}>
-                  👤 Para: {lastBooked.fullName}
-                </p>
-                <hr style={{ width: '100%', margin: '20px 0 16px', border: 'none', borderTop: '1px solid var(--outline-variant)' }} />
-                <p className="text-body-md fw-bold text-center" style={{ color: 'var(--slot-occupied)', margin: 0 }}>
-                  ⚠️ Debes estar 5 minutos antes de tu cita.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 w-full" style={{ maxWidth: 360 }}>
-              <Button full large onClick={resetFlow}>
-                Volver al inicio
-              </Button>
-            </div>
-          </div>
-        )}
+        
       </div>
     </div>
   );
